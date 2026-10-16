@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -43,11 +44,15 @@ fun PipelineScreen(
             title = { Text("Quality Gate Validation", color = CrimsonCriticalLight, fontWeight = FontWeight.Bold) },
             text = { Text(error, color = Slate200) },
             confirmButton = {
-                Button(onClick = { viewModel.clearError() }) {
-                    Text("Understood")
+                Button(
+                    onClick = { viewModel.clearError() },
+                    colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary)
+                ) {
+                    Text("Understood", color = Slate950, fontWeight = FontWeight.Bold)
                 }
             },
-            containerColor = Slate900
+            containerColor = Slate900,
+            shape = RoundedCornerShape(18.dp)
         )
     }
 
@@ -69,9 +74,10 @@ fun PipelineScreen(
                     text = "PRODUCTION PIPELINE",
                     style = Typography.labelSmall,
                     color = ElectricBluePrimary,
-                    letterSpacing = 1.2.sp,
+                    letterSpacing = 1.4.sp,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Content Flow",
                     style = Typography.headlineMedium,
@@ -81,17 +87,21 @@ fun PipelineScreen(
             }
 
             // View toggle (Kanban vs List)
-            IconButton(
+            Surface(
                 onClick = { viewModel.toggleViewMode() },
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Slate800)
+                shape = RoundedCornerShape(12.dp),
+                color = Slate800,
+                border = BorderStroke(1.dp, BorderDefault),
+                modifier = Modifier.size(44.dp)
             ) {
-                Icon(
-                    imageVector = if (uiState.isKanbanView) Icons.Default.ViewList else Icons.Default.ViewKanban,
-                    contentDescription = "Toggle View",
-                    tint = ElectricBluePrimary
-                )
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = if (uiState.isKanbanView) Icons.Default.ViewList else Icons.Default.ViewKanban,
+                        contentDescription = "Toggle View",
+                        tint = ElectricBluePrimary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
             }
         }
 
@@ -106,31 +116,36 @@ fun PipelineScreen(
                 FilterChip(
                     selected = uiState.selectedStageFilter == null,
                     onClick = { viewModel.setStageFilter(null) },
-                    label = { Text("All Stages (${uiState.items.size})") },
+                    label = { Text("All Stages (${uiState.items.size})", fontWeight = FontWeight.SemiBold) },
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, if (uiState.selectedStageFilter == null) ElectricBluePrimary else BorderSubtle),
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = ElectricBluePrimary,
                         selectedLabelColor = Slate950,
-                        containerColor = Slate800,
+                        containerColor = Slate850,
                         labelColor = Slate300
                     )
                 )
             }
             items(WorkflowStage.values().filter { !it.isTerminal() }) { stage ->
+                val stageCount = uiState.items.count { it.status == stage }
                 FilterChip(
                     selected = uiState.selectedStageFilter == stage,
                     onClick = { viewModel.setStageFilter(stage) },
-                    label = { Text(stage.displayName) },
+                    label = { Text("${stage.displayName} ($stageCount)", fontWeight = FontWeight.SemiBold) },
+                    shape = RoundedCornerShape(20.dp),
+                    border = BorderStroke(1.dp, if (uiState.selectedStageFilter == stage) ElectricBluePrimary else BorderSubtle),
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = ElectricBluePrimary,
                         selectedLabelColor = Slate950,
-                        containerColor = Slate800,
+                        containerColor = Slate850,
                         labelColor = Slate300
                     )
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         if (uiState.isKanbanView) {
             // Kanban Column View
@@ -188,6 +203,9 @@ fun PipelineScreen(
                         onDelete = { viewModel.deleteItem(item.id) }
                     )
                 }
+                item {
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
         }
     }
@@ -203,33 +221,43 @@ fun KanbanColumn(
 ) {
     Card(
         modifier = Modifier
-            .width(280.dp)
+            .width(285.dp)
             .fillMaxHeight()
             .padding(bottom = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Slate850),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, Slate800)
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, BorderDefault)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             // Column Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stage.displayName,
-                    style = Typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Slate100
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(ElectricBluePrimary)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stage.displayName,
+                        style = Typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Slate100
+                    )
+                }
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = Slate800
+                    color = Slate800,
+                    border = BorderStroke(1.dp, BorderSubtle)
                 ) {
                     Text(
                         text = "${items.size}",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
                         style = Typography.labelSmall,
                         color = ElectricBluePrimary,
                         fontWeight = FontWeight.Bold
@@ -237,7 +265,7 @@ fun KanbanColumn(
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -266,36 +294,53 @@ fun PipelineCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Slate800),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, Slate700)
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, BorderSubtle)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    shape = RoundedCornerShape(4.dp),
+                    shape = RoundedCornerShape(6.dp),
                     color = ElectricBluePrimary.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = item.contentType.displayName,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp),
                         style = Typography.labelSmall,
                         fontSize = 10.sp,
-                        color = ElectricBluePrimary
+                        color = ElectricBluePrimary,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
-                Text(
-                    text = "Score: ${item.demandScore}/10",
-                    style = Typography.labelSmall,
-                    color = if (item.demandScore >= 7) MintProgressLight else Slate400
-                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = when {
+                        item.demandScore >= 8 -> MintProgress.copy(alpha = 0.15f)
+                        item.demandScore >= 5 -> ElectricBluePrimary.copy(alpha = 0.15f)
+                        else -> AmberWarning.copy(alpha = 0.15f)
+                    }
+                ) {
+                    Text(
+                        text = "Score: ${item.demandScore}/10",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = Typography.labelSmall,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = when {
+                            item.demandScore >= 8 -> MintProgressLight
+                            item.demandScore >= 5 -> ElectricBluePrimary
+                            else -> AmberWarningLight
+                        }
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = item.title,
                 style = Typography.titleMedium,
@@ -307,32 +352,39 @@ fun PipelineCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Next: ${item.nextAction}",
-                    style = Typography.bodyMedium,
+                    style = Typography.bodySmall,
                     color = Slate400
                 )
             }
 
             if (item.targetPlatforms.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     item.targetPlatforms.forEach { p ->
+                        val (pColor, pBg) = when {
+                            p.contains("YOUTUBE", ignoreCase = true) -> Pair(YouTubeRed, YouTubeRed.copy(alpha = 0.15f))
+                            p.contains("TIKTOK", ignoreCase = true) -> Pair(TikTokCyan, TikTokCyan.copy(alpha = 0.15f))
+                            p.contains("INSTAGRAM", ignoreCase = true) -> Pair(InstagramPurple, InstagramPurple.copy(alpha = 0.15f))
+                            else -> Pair(ElectricBluePrimary, ElectricBluePrimary.copy(alpha = 0.15f))
+                        }
                         Surface(
-                            shape = RoundedCornerShape(3.dp),
-                            color = Slate700
+                            shape = RoundedCornerShape(4.dp),
+                            color = pBg
                         ) {
                             Text(
-                                text = p.take(6),
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                                text = p.take(7),
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
                                 style = Typography.labelSmall,
                                 fontSize = 9.sp,
-                                color = Slate200
+                                color = pColor,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Action Buttons
             Row(
@@ -340,21 +392,40 @@ fun PipelineCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = onOpenScript) {
-                    Icon(Icons.Default.EditNote, contentDescription = "Script", tint = ElectricBluePrimary)
-                }
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    IconButton(
+                        onClick = onOpenScript,
+                        modifier = Modifier.size(38.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.EditNote,
+                            contentDescription = "Script",
+                            tint = ElectricBluePrimary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
 
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Slate600)
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(38.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteOutline,
+                            contentDescription = "Delete",
+                            tint = Slate500,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
 
                 Button(
                     onClick = onAdvanceStage,
-                    shape = RoundedCornerShape(8.dp),
-                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary)
                 ) {
                     Text("Next Stage", color = Slate950, style = Typography.labelSmall, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.width(4.dp))
                     Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Slate950, modifier = Modifier.size(16.dp))
                 }
             }
@@ -378,5 +449,3 @@ private fun getNextStage(current: WorkflowStage): WorkflowStage? {
         else -> null
     }
 }
-
-val Slate300 = Color(0xFFCBD5E1)

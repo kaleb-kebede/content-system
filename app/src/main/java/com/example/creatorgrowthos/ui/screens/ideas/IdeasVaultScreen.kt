@@ -60,19 +60,24 @@ fun IdeasVaultScreen(
             title = { Text("Idea Promoted!", color = MintProgressLight, fontWeight = FontWeight.Bold) },
             text = { Text("Idea has been converted into an active production item in your pipeline.", color = Slate200) },
             confirmButton = {
-                Button(onClick = {
-                    viewModel.clearPromotedId()
-                    onNavigateToPipeline()
-                }) {
-                    Text("Go to Pipeline")
+                Button(
+                    onClick = {
+                        viewModel.clearPromotedId()
+                        onNavigateToPipeline()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Go to Pipeline", color = Slate950, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.clearPromotedId() }) {
-                    Text("Stay in Ideas")
+                    Text("Stay in Ideas", color = Slate400)
                 }
             },
-            containerColor = Slate900
+            containerColor = Slate900,
+            shape = RoundedCornerShape(20.dp)
         )
     }
 
@@ -83,7 +88,7 @@ fun IdeasVaultScreen(
             .padding(horizontal = 16.dp)
     ) {
         // Ideas Header
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -94,9 +99,10 @@ fun IdeasVaultScreen(
                     text = "CONTENT IDEAS VAULT",
                     style = Typography.labelSmall,
                     color = ElectricBluePrimary,
-                    letterSpacing = 1.2.sp,
+                    letterSpacing = 1.4.sp,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "Ideas & Inspiration",
                     style = Typography.headlineMedium,
@@ -108,29 +114,32 @@ fun IdeasVaultScreen(
             Button(
                 onClick = { showCaptureDialog = true },
                 colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, tint = Slate950)
-                Spacer(modifier = Modifier.width(4.dp))
+                Icon(Icons.Default.Add, contentDescription = null, tint = Slate950, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(6.dp))
                 Text("New Idea", color = Slate950, fontWeight = FontWeight.Bold)
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Search Field
         OutlinedTextField(
             value = uiState.searchQuery,
             onValueChange = { viewModel.setSearchQuery(it) },
-            placeholder = { Text("Search ideas, hooks, problems...", color = Slate600) },
+            placeholder = { Text("Search ideas, hooks, problems...", color = Slate500) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Slate400) },
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = ElectricBluePrimary,
-                unfocusedBorderColor = Slate800,
+                unfocusedBorderColor = BorderDefault,
                 focusedTextColor = Slate100,
-                unfocusedTextColor = Slate100
+                unfocusedTextColor = Slate100,
+                focusedContainerColor = Slate850,
+                unfocusedContainerColor = Slate850
             )
         )
 
@@ -143,19 +152,23 @@ fun IdeasVaultScreen(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Min Demand Score: ${uiState.minDemandFilter}/10",
+                text = "Min Demand Score:",
                 style = Typography.labelSmall,
                 color = Slate400
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 listOf(1, 5, 7, 9).forEach { score ->
                     FilterChip(
                         selected = uiState.minDemandFilter == score,
                         onClick = { viewModel.setMinDemandFilter(score) },
-                        label = { Text("$score+") },
+                        label = { Text("$score+", fontWeight = FontWeight.Bold) },
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, if (uiState.minDemandFilter == score) ElectricBluePrimary else BorderSubtle),
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = ElectricBluePrimary,
-                            selectedLabelColor = Slate950
+                            selectedLabelColor = Slate950,
+                            containerColor = Slate800,
+                            labelColor = Slate300
                         )
                     )
                 }
@@ -167,28 +180,28 @@ fun IdeasVaultScreen(
         // Ideas List
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(uiState.ideas, key = { it.id }) { idea ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Slate850),
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Slate800)
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, BorderSubtle)
                 ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = if (idea.demandScore >= 8) MintProgressLight.copy(alpha = 0.2f) else Slate800
+                                shape = RoundedCornerShape(6.dp),
+                                color = if (idea.demandScore >= 8) MintProgress.copy(alpha = 0.15f) else ElectricBluePrimary.copy(alpha = 0.15f)
                             ) {
                                 Text(
                                     text = "Demand: ${idea.demandScore}/10",
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                                     style = Typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (idea.demandScore >= 8) MintProgressLight else ElectricBluePrimary
@@ -197,20 +210,21 @@ fun IdeasVaultScreen(
 
                             if (idea.status == "PROMOTED") {
                                 Surface(
-                                    shape = RoundedCornerShape(4.dp),
-                                    color = Slate800
+                                    shape = RoundedCornerShape(6.dp),
+                                    color = MintProgress.copy(alpha = 0.15f)
                                 ) {
                                     Text(
                                         text = "IN PIPELINE",
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                                         style = Typography.labelSmall,
-                                        color = MintProgressLight
+                                        color = MintProgressLight,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = idea.title,
                             style = Typography.titleMedium,
@@ -234,15 +248,18 @@ fun IdeasVaultScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(onClick = { viewModel.deleteIdea(idea.id) }) {
-                                Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Slate600)
+                            IconButton(
+                                onClick = { viewModel.deleteIdea(idea.id) },
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Slate500, modifier = Modifier.size(18.dp))
                             }
 
                             if (idea.status != "PROMOTED") {
                                 Button(
                                     onClick = { viewModel.promoteIdeaToPipeline(idea.id) },
                                     colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
-                                    shape = RoundedCornerShape(8.dp),
+                                    shape = RoundedCornerShape(10.dp),
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                                 ) {
                                     Text("Promote to Pipeline", color = Slate950, style = Typography.labelSmall, fontWeight = FontWeight.Bold)
@@ -255,7 +272,7 @@ fun IdeasVaultScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(30.dp)) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }
@@ -280,7 +297,13 @@ fun QuickIdeaCaptureDialog(
                     onValueChange = { title = it },
                     label = { Text("Idea Headline / Hook") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = ElectricBluePrimary,
+                        unfocusedBorderColor = BorderDefault,
+                        focusedTextColor = Slate100,
+                        unfocusedTextColor = Slate100
+                    )
                 )
 
                 OutlinedTextField(
@@ -289,27 +312,52 @@ fun QuickIdeaCaptureDialog(
                     label = { Text("Rough thoughts / Problem / Angle") },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = ElectricBluePrimary,
+                        unfocusedBorderColor = BorderDefault,
+                        focusedTextColor = Slate100,
+                        unfocusedTextColor = Slate100
+                    )
                 )
 
-                Text("Demand Score (1 to 10): $demandScore", style = Typography.labelSmall, color = Slate300)
+                Text("Demand Score (1 to 10): $demandScore", style = Typography.labelSmall, color = Slate300, fontWeight = FontWeight.Bold)
                 Slider(
                     value = demandScore.toFloat(),
                     onValueChange = { demandScore = it.toInt() },
                     valueRange = 1f..10f,
-                    steps = 8
+                    steps = 8,
+                    colors = SliderDefaults.colors(
+                        thumbColor = ElectricBluePrimary,
+                        activeTrackColor = ElectricBluePrimary,
+                        inactiveTrackColor = Slate800
+                    )
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(
                         selected = format == ContentFormat.SHORT_FORM_VIDEO,
                         onClick = { format = ContentFormat.SHORT_FORM_VIDEO },
-                        label = { Text("Short-form") }
+                        label = { Text("Short-form", fontWeight = FontWeight.Bold) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = ElectricBluePrimary,
+                            selectedLabelColor = Slate950,
+                            containerColor = Slate800,
+                            labelColor = Slate300
+                        )
                     )
                     FilterChip(
                         selected = format == ContentFormat.LONG_FORM_VIDEO,
                         onClick = { format = ContentFormat.LONG_FORM_VIDEO },
-                        label = { Text("Long-form YT") }
+                        label = { Text("Long-form YT", fontWeight = FontWeight.Bold) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = ElectricBluePrimary,
+                            selectedLabelColor = Slate950,
+                            containerColor = Slate800,
+                            labelColor = Slate300
+                        )
                     )
                 }
             }
@@ -319,7 +367,8 @@ fun QuickIdeaCaptureDialog(
                 onClick = {
                     if (title.isNotBlank()) onSave(title, rawIdea, demandScore, format)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text("Save to Vault", color = Slate950, fontWeight = FontWeight.Bold)
             }
@@ -327,6 +376,8 @@ fun QuickIdeaCaptureDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel", color = Slate400) }
         },
-        containerColor = Slate900
+        containerColor = Slate900,
+        shape = RoundedCornerShape(20.dp)
     )
 }
+

@@ -9,8 +9,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,7 +43,7 @@ fun ScriptEditorScreen(
             .background(Slate900)
             .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Editor Header & Word Count / Duration Pill
         Row(
@@ -49,29 +51,31 @@ fun ScriptEditorScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "SCRIPT WRITING HUB",
                     style = Typography.labelSmall,
                     color = ElectricBluePrimary,
-                    letterSpacing = 1.2.sp,
+                    letterSpacing = 1.4.sp,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = uiState.currentScript?.title ?: "Script Editor",
                     style = Typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Slate100
+                    color = Slate100,
+                    maxLines = 1
                 )
             }
 
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = Slate800,
-                border = BorderStroke(1.dp, Slate700)
+                color = Slate850,
+                border = BorderStroke(1.dp, BorderDefault)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -80,14 +84,14 @@ fun ScriptEditorScreen(
                         tint = ElectricBluePrimary,
                         modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "${uiState.estimatedDurationFormatted} (${uiState.wordCount} words)",
+                        text = "${uiState.estimatedDurationFormatted} (${uiState.wordCount}w)",
                         style = Typography.labelSmall,
                         color = Slate100,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = if (uiState.isSaved) Icons.Default.CloudDone else Icons.Default.Sync,
                         contentDescription = "Save status",
@@ -98,42 +102,62 @@ fun ScriptEditorScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Full Script Body / Scene Breakdown
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Main Body Editor
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Slate850),
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Slate800)
+                    shape = RoundedCornerShape(18.dp),
+                    border = BorderStroke(1.dp, BorderDefault)
                 ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
-                        Text(
-                            text = "Full Script Narrative & Teleprompter",
-                            style = Typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Slate100
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Full Script Narrative & Teleprompter",
+                                style = Typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Slate100
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Slate800
+                            ) {
+                                Text(
+                                    text = "Live Sync",
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    style = Typography.labelSmall,
+                                    fontSize = 10.sp,
+                                    color = Slate400
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(10.dp))
                         OutlinedTextField(
                             value = uiState.currentScript?.scriptBody ?: "",
                             onValueChange = { viewModel.updateScriptBody(it) },
-                            placeholder = { Text("Write your full script here... Word count and duration update automatically.", color = Slate600) },
+                            placeholder = { Text("Write your full script here... Word count and pacing update automatically.", color = Slate500) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(min = 160.dp),
-                            shape = RoundedCornerShape(10.dp),
+                                .heightIn(min = 180.dp),
+                            shape = RoundedCornerShape(12.dp),
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = ElectricBluePrimary,
-                                unfocusedBorderColor = Slate700,
+                                unfocusedBorderColor = BorderSubtle,
                                 focusedTextColor = Slate100,
-                                unfocusedTextColor = Slate100
+                                unfocusedTextColor = Slate100,
+                                focusedContainerColor = Slate900,
+                                unfocusedContainerColor = Slate900
                             )
                         )
                     }
@@ -144,7 +168,7 @@ fun ScriptEditorScreen(
             if (uiState.sections.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Scene Progression & Visual Beats (${uiState.sections.size} beats)",
+                        text = "Scene Progression & Visual Beats (${uiState.sections.size})",
                         style = Typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Slate100
@@ -161,7 +185,7 @@ fun ScriptEditorScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(30.dp)) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }
@@ -177,22 +201,22 @@ fun SceneSectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Slate850),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, Slate800)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, BorderSubtle)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Surface(
-                    shape = RoundedCornerShape(4.dp),
+                    shape = RoundedCornerShape(6.dp),
                     color = ElectricBluePrimary.copy(alpha = 0.15f)
                 ) {
                     Text(
                         text = "BEAT ${section.sectionOrder + 1}: ${section.title}",
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                         style = Typography.labelSmall,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
@@ -200,14 +224,21 @@ fun SceneSectionCard(
                     )
                 }
 
-                Text(
-                    text = "~${section.durationEstimateSeconds}s",
-                    style = Typography.labelSmall,
-                    color = Slate400
-                )
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = Slate800
+                ) {
+                    Text(
+                        text = "~${section.durationEstimateSeconds}s",
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                        style = Typography.labelSmall,
+                        fontSize = 10.sp,
+                        color = Slate400
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Spoken Words
             OutlinedTextField(
@@ -218,16 +249,18 @@ fun SceneSectionCard(
                 },
                 label = { Text("Spoken Voice-Over", fontSize = 11.sp) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = ElectricBluePrimary,
-                    unfocusedBorderColor = Slate700,
+                    unfocusedBorderColor = BorderSubtle,
                     focusedTextColor = Slate100,
-                    unfocusedTextColor = Slate100
+                    unfocusedTextColor = Slate100,
+                    focusedContainerColor = Slate900,
+                    unfocusedContainerColor = Slate900
                 )
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Visual / On-Screen Notes
             OutlinedTextField(
@@ -238,14 +271,17 @@ fun SceneSectionCard(
                 },
                 label = { Text("B-Roll / Visual Notes / Text On-Screen", fontSize = 11.sp) },
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MintProgressLight,
-                    unfocusedBorderColor = Slate700,
+                    focusedBorderColor = PurpleAccentLight,
+                    unfocusedBorderColor = BorderSubtle,
                     focusedTextColor = Slate200,
-                    unfocusedTextColor = Slate200
+                    unfocusedTextColor = Slate200,
+                    focusedContainerColor = Slate900,
+                    unfocusedContainerColor = Slate900
                 )
             )
         }
     }
 }
+

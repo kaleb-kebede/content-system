@@ -1,14 +1,17 @@
 package com.example.creatorgrowthos.ui.main
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -55,49 +58,70 @@ fun MainScreen(
                     onClick = { showQuickCreate = true },
                     containerColor = ElectricBluePrimary,
                     contentColor = Slate950,
-                    shape = CircleShape
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 6.dp,
+                        pressedElevation = 10.dp
+                    )
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "Quick Create"
+                        contentDescription = "Quick Create",
+                        modifier = Modifier.size(26.dp)
                     )
                 }
             }
         },
         bottomBar = {
             if (isTopLevelDestination) {
-                NavigationBar(
-                    containerColor = Slate950,
-                    contentColor = Slate300,
+                Surface(
+                    color = Slate950,
+                    border = BorderStroke(1.dp, BorderSubtle),
                     tonalElevation = 8.dp
                 ) {
-                    Screen.bottomNavItems.forEach { screen ->
-                        val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                    NavigationBar(
+                        containerColor = Color.Transparent,
+                        contentColor = Slate300,
+                        tonalElevation = 0.dp
+                    ) {
+                        Screen.bottomNavItems.forEach { screen ->
+                            val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
+                            NavigationBarItem(
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                screen.icon?.let { icon ->
-                                    Icon(imageVector = icon, contentDescription = screen.title)
-                                }
-                            },
-                            label = { Text(screen.title, style = Typography.labelSmall) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = ElectricBluePrimary,
-                                selectedTextColor = ElectricBluePrimary,
-                                unselectedIconColor = Slate500,
-                                unselectedTextColor = Slate500,
-                                indicatorColor = Slate850
+                                },
+                                icon = {
+                                    screen.icon?.let { icon ->
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = screen.title,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
+                                },
+                                label = {
+                                    Text(
+                                        text = screen.title,
+                                        style = Typography.labelSmall,
+                                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                    )
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = ElectricBluePrimary,
+                                    selectedTextColor = ElectricBluePrimary,
+                                    unselectedIconColor = Slate500,
+                                    unselectedTextColor = Slate500,
+                                    indicatorColor = ElectricBluePrimary.copy(alpha = 0.16f)
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }

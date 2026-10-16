@@ -1,5 +1,6 @@
 package com.example.creatorgrowthos.ui.screens.today
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CallSplit
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -21,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.creatorgrowthos.data.local.entity.ContentTaskEntity
 import com.example.creatorgrowthos.domain.scheduler.RecoveryOption
@@ -45,10 +48,11 @@ fun RecoveryDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(20.dp),
+                .padding(4.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = Slate900),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            border = BorderStroke(1.dp, BorderDefault),
+            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -57,20 +61,21 @@ fun RecoveryDialog(
             ) {
                 // Warning Header
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(CrimsonCriticalLight.copy(alpha = 0.2f)),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = CrimsonCritical.copy(alpha = 0.2f),
+                        modifier = Modifier.size(44.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Warning",
-                            tint = CrimsonCriticalLight
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Warning",
+                                tint = CrimsonCriticalLight,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Text(
                             text = "Critical Task Missed",
@@ -79,8 +84,8 @@ fun RecoveryDialog(
                             color = Slate100
                         )
                         Text(
-                            text = "A recovery decision is required",
-                            style = Typography.bodyMedium,
+                            text = "Strict routine decision required",
+                            style = Typography.bodySmall,
                             color = CrimsonCriticalLight
                         )
                     }
@@ -89,29 +94,39 @@ fun RecoveryDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Task Details Card
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Slate800),
-                    shape = RoundedCornerShape(12.dp)
+                Surface(
+                    shape = RoundedCornerShape(14.dp),
+                    color = Slate850,
+                    border = BorderStroke(1.dp, BorderSubtle),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Text(
                             text = task.title,
                             style = Typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold,
+                            fontWeight = FontWeight.Bold,
                             color = Slate100
                         )
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Estimated: ${task.estimatedDurationMinutes}m • Priority: ${task.priority.label}",
-                            style = Typography.bodyMedium,
-                            color = Slate400
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "${task.estimatedDurationMinutes}m session",
+                                style = Typography.bodySmall,
+                                color = Slate300
+                            )
+                            Text(text = " • ", style = Typography.bodySmall, color = Slate600)
+                            Text(
+                                text = task.priority.label,
+                                style = Typography.labelSmall,
+                                color = AmberWarningLight
+                            )
+                        }
                         if (task.rescheduleCount > 0) {
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Previously rescheduled ${task.rescheduleCount} time(s)",
                                 style = Typography.labelSmall,
-                                color = AmberWarningLight
+                                color = CrimsonCriticalLight
                             )
                         }
                     }
@@ -120,103 +135,144 @@ fun RecoveryDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Select Recovery Strategy:",
-                    style = Typography.labelLarge,
-                    color = Slate200
+                    text = "SELECT RECOVERY ACTION",
+                    style = Typography.labelSmall,
+                    color = ElectricBluePrimary,
+                    letterSpacing = 1.2.sp,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Options
+                // Decision Options
                 options.forEach { option ->
-                    val icon = when (option.actionType) {
-                        "RESCHEDULE" -> Icons.Default.Alarm
-                        "SPLIT" -> Icons.Default.CallSplit
-                        "MARK_BLOCKED" -> Icons.Default.Block
-                        else -> Icons.Default.SkipNext
+                    val (icon, iconTint, iconBg) = when (option.actionType) {
+                        "RESCHEDULE" -> Triple(Icons.Default.Alarm, ElectricBluePrimary, ElectricBluePrimary.copy(alpha = 0.15f))
+                        "SPLIT" -> Triple(Icons.Default.CallSplit, PurpleAccentLight, PurpleAccent.copy(alpha = 0.15f))
+                        "MARK_BLOCKED" -> Triple(Icons.Default.Block, AmberWarningLight, AmberWarning.copy(alpha = 0.15f))
+                        else -> Triple(Icons.Default.SkipNext, Slate400, Slate700.copy(alpha = 0.4f))
                     }
 
-                    Card(
+                    Surface(
+                        onClick = {
+                            val reason = if (showCustomInput && customReason.isNotBlank()) customReason else selectedReason
+                            when (option.actionType) {
+                                "RESCHEDULE" -> {
+                                    val start = option.suggestedStartUtc ?: (System.currentTimeMillis() + 15 * 60 * 1000L)
+                                    val end = option.suggestedEndUtc ?: (start + task.estimatedDurationMinutes * 60 * 1000L)
+                                    onReschedule(start, end, reason)
+                                }
+                                "SPLIT" -> {
+                                    val half = task.estimatedDurationMinutes / 2
+                                    val start = option.suggestedStartUtc ?: (System.currentTimeMillis() + 15 * 60 * 1000L)
+                                    onSplit(half, half, start)
+                                }
+                                "MARK_BLOCKED" -> onBlock(reason)
+                                "SKIP" -> onSkip(reason)
+                            }
+                        },
+                        shape = RoundedCornerShape(14.dp),
+                        color = Slate850,
+                        border = BorderStroke(1.dp, BorderSubtle),
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .clickable {
-                                val reason = if (showCustomInput && customReason.isNotBlank()) customReason else selectedReason
-                                when (option.actionType) {
-                                    "RESCHEDULE" -> {
-                                        val start = option.suggestedStartUtc ?: (System.currentTimeMillis() + 15 * 60 * 1000L)
-                                        val end = option.suggestedEndUtc ?: (start + task.estimatedDurationMinutes * 60 * 1000L)
-                                        onReschedule(start, end, reason)
-                                    }
-                                    "SPLIT" -> {
-                                        val half = task.estimatedDurationMinutes / 2
-                                        val start = option.suggestedStartUtc ?: (System.currentTimeMillis() + 15 * 60 * 1000L)
-                                        onSplit(half, half, start)
-                                    }
-                                    "MARK_BLOCKED" -> onBlock(reason)
-                                    "SKIP" -> onSkip(reason)
-                                }
-                            },
-                        colors = CardDefaults.cardColors(containerColor = Slate850),
-                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(imageVector = icon, contentDescription = null, tint = ElectricBluePrimary)
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = iconBg,
+                                modifier = Modifier.size(38.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        tint = iconTint,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = option.title, style = Typography.bodyLarge, fontWeight = FontWeight.Medium, color = Slate100)
-                                Text(text = option.description, style = Typography.bodyMedium, color = Slate400)
+                                Text(
+                                    text = option.title,
+                                    style = Typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Slate100
+                                )
+                                Text(
+                                    text = option.description,
+                                    style = Typography.bodySmall,
+                                    color = Slate400
+                                )
                             }
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = Slate500,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
                 // Document Reason
-                Text(text = "Document Cause / Reason:", style = Typography.labelLarge, color = Slate400)
-                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "DOCUMENT REASON (AUDIT LOG)",
+                    style = Typography.labelSmall,
+                    color = Slate400,
+                    letterSpacing = 1.0.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
                     value = customReason,
                     onValueChange = {
                         customReason = it
                         showCustomInput = true
                     },
-                    placeholder = { Text("e.g. Script revisions took longer than estimated", color = Slate600) },
+                    placeholder = { Text("e.g. Script revisions took longer than estimated", color = Slate500) },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = ElectricBluePrimary,
-                        unfocusedBorderColor = Slate700,
+                        unfocusedBorderColor = BorderDefault,
                         focusedTextColor = Slate100,
-                        unfocusedTextColor = Slate100
+                        unfocusedTextColor = Slate100,
+                        focusedContainerColor = Slate850,
+                        unfocusedContainerColor = Slate850
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                // Emergency Override Action (Recorded)
+                // Emergency Override Action
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Decide Later", color = Slate400)
+                        Text("Decide Later", color = Slate400, style = Typography.labelLarge)
                     }
 
                     OutlinedButton(
                         onClick = onEmergencyOverride,
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = AmberWarningLight),
-                        border = ButtonDefaults.outlinedButtonBorder.copy(brush = androidx.compose.ui.graphics.SolidColor(AmberWarningLight))
+                        border = BorderStroke(1.dp, AmberWarningLight),
+                        shape = RoundedCornerShape(10.dp)
                     ) {
-                        Text("Emergency Override")
+                        Text("Emergency Override", fontWeight = FontWeight.Bold)
                     }
                 }
             }
         }
     }
 }
+

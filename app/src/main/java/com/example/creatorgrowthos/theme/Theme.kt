@@ -20,14 +20,19 @@ private val DarkColorScheme = darkColorScheme(
     onSecondary = Slate950,
     secondaryContainer = Slate850,
     onSecondaryContainer = MintProgressLight,
-    tertiary = VioletSecondary,
+    tertiary = PurpleAccent,
+    onTertiary = Slate950,
     background = Slate900,
     onBackground = Slate100,
     surface = Slate850,
     onSurface = Slate100,
     surfaceVariant = Slate800,
     onSurfaceVariant = Slate400,
-    outline = Slate700,
+    surfaceContainer = Slate850,
+    surfaceContainerHigh = Slate800,
+    surfaceContainerHighest = Slate750,
+    outline = BorderDefault,
+    outlineVariant = BorderSubtle,
     error = CrimsonCriticalLight,
     onError = Slate950
 )
@@ -41,7 +46,7 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = Slate100,
     secondaryContainer = LightSurfaceVariant,
     onSecondaryContainer = MintProgress,
-    tertiary = VioletSecondary,
+    tertiary = PurpleAccent,
     background = LightBackground,
     onBackground = LightTextPrimary,
     surface = LightSurface,
@@ -65,9 +70,9 @@ fun CreatorGrowthOSTheme(
             val window = (view.context as? Activity)?.window
             if (window != null) {
                 window.statusBarColor = colorScheme.background.toArgb()
-                window.navigationBarColor = colorScheme.background.toArgb()
+                window.navigationBarColor = Slate950.toArgb()
                 WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-                WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+                WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = false
             }
         }
     }
@@ -78,3 +83,4 @@ fun CreatorGrowthOSTheme(
         content = content
     )
 }
+

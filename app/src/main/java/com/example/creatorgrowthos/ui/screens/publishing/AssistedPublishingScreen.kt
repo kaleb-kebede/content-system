@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Launch
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material3.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.creatorgrowthos.theme.*
@@ -43,17 +45,26 @@ fun AssistedPublishingScreen(
             onDismissRequest = { viewModel.dismissConfirmDialog() },
             title = { Text("Confirm Successful Publication", color = Slate100, fontWeight = FontWeight.Bold) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Enter the live URL of your published post to save the official record and schedule your 48h analytics follow-up:",
-                        color = Slate300
+                        text = "Enter the live post URL to record the publication and initiate the 48h analytics tracking window:",
+                        color = Slate300,
+                        style = Typography.bodyMedium
                     )
                     OutlinedTextField(
                         value = publishedUrlInput,
                         onValueChange = { publishedUrlInput = it },
-                        placeholder = { Text("https://youtube.com/shorts/... or https://tiktok.com/...") },
+                        placeholder = { Text("https://youtube.com/shorts/... or https://tiktok.com/@...", color = Slate500) },
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MintProgressLight,
+                            unfocusedBorderColor = BorderDefault,
+                            focusedTextColor = Slate100,
+                            unfocusedTextColor = Slate100,
+                            focusedContainerColor = Slate850,
+                            unfocusedContainerColor = Slate850
+                        )
                     )
                 }
             },
@@ -62,7 +73,8 @@ fun AssistedPublishingScreen(
                     onClick = {
                         viewModel.confirmPublication(publishedUrlInput.ifBlank { "https://${uiState.publication?.destination?.packageName}/post" })
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MintProgress)
+                    colors = ButtonDefaults.buttonColors(containerColor = MintProgress),
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text("Confirm & Record", color = Slate950, fontWeight = FontWeight.Bold)
                 }
@@ -72,7 +84,8 @@ fun AssistedPublishingScreen(
                     Text("Cancel", color = Slate400)
                 }
             },
-            containerColor = Slate900
+            containerColor = Slate900,
+            shape = RoundedCornerShape(20.dp)
         )
     }
 
@@ -85,26 +98,42 @@ fun AssistedPublishingScreen(
     ) {
         // Header
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Column {
                 Text(
                     text = "ASSISTED PUBLISHING WORKFLOW",
                     style = Typography.labelSmall,
                     color = ElectricBluePrimary,
-                    letterSpacing = 1.2.sp,
+                    letterSpacing = 1.4.sp,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = uiState.publication?.platformSpecificTitle?.ifBlank { "Publish Post" } ?: "Publish Post",
                     style = Typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = Slate100
                 )
-                Text(
-                    text = "Destination: ${uiState.publication?.destination?.displayName ?: ""}",
-                    style = Typography.titleMedium,
-                    color = AmberWarningLight
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "Destination: ",
+                        style = Typography.bodyMedium,
+                        color = Slate400
+                    )
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = Slate800
+                    ) {
+                        Text(
+                            text = uiState.publication?.destination?.displayName ?: "Platform",
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            style = Typography.labelSmall,
+                            color = AmberWarningLight,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
 
@@ -115,19 +144,28 @@ fun AssistedPublishingScreen(
                 colors = CardDefaults.cardColors(
                     containerColor = if (uiState.isConfirmed) MintProgress.copy(alpha = 0.15f) else Slate850
                 ),
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, if (uiState.isConfirmed) MintProgressLight else Slate700)
+                shape = RoundedCornerShape(16.dp),
+                border = BorderStroke(1.dp, if (uiState.isConfirmed) MintProgressLight.copy(alpha = 0.8f) else BorderDefault)
             ) {
                 Row(
-                    modifier = Modifier.padding(14.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = if (uiState.isConfirmed) Icons.Default.CheckCircle else Icons.Default.Link,
-                        contentDescription = null,
-                        tint = if (uiState.isConfirmed) MintProgressLight else ElectricBluePrimary
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Surface(
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (uiState.isConfirmed) MintProgress.copy(alpha = 0.2f) else Slate800,
+                        modifier = Modifier.size(42.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = if (uiState.isConfirmed) Icons.Default.CheckCircle else Icons.Default.Link,
+                                contentDescription = null,
+                                tint = if (uiState.isConfirmed) MintProgressLight else ElectricBluePrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Text(
                             text = if (uiState.isConfirmed) "PUBLICATION CONFIRMED" else "STATUS: ${uiState.publication?.publicationStatus?.displayName}",
@@ -136,10 +174,11 @@ fun AssistedPublishingScreen(
                             color = if (uiState.isConfirmed) MintProgressLight else Slate100
                         )
                         if (uiState.publication?.publishedUrl != null) {
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "URL: ${uiState.publication?.publishedUrl}",
-                                style = Typography.bodyMedium,
-                                color = Slate400
+                                text = "Live URL: ${uiState.publication?.publishedUrl}",
+                                style = Typography.bodySmall,
+                                color = Slate300
                             )
                         }
                     }
@@ -152,44 +191,77 @@ fun AssistedPublishingScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Slate850),
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, Slate800)
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, BorderSubtle)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "1. Final Caption & Hashtags",
-                        style = Typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Slate100
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = uiState.publication?.caption ?: "No caption prepared.",
-                        style = Typography.bodyLarge,
-                        color = Slate200
-                    )
-
-                    if (uiState.publication?.hashtags?.isNotEmpty() == true) {
-                        Spacer(modifier = Modifier.height(6.dp))
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = uiState.publication!!.hashtags.joinToString(" ") { if (it.startsWith("#")) it else "#$it" },
-                            style = Typography.bodyMedium,
-                            color = ElectricBluePrimary
+                            text = "1. Final Caption & Hashtags",
+                            style = Typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Slate100
                         )
+                        if (uiState.captionCopied) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MintProgress.copy(alpha = 0.2f)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(Icons.Default.Done, contentDescription = null, tint = MintProgressLight, modifier = Modifier.size(14.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("Copied", style = Typography.labelSmall, color = MintProgressLight, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Slate900,
+                        border = BorderStroke(1.dp, BorderSubtle),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = uiState.publication?.caption ?: "No caption prepared.",
+                                style = Typography.bodyLarge,
+                                color = Slate200
+                            )
+
+                            if (uiState.publication?.hashtags?.isNotEmpty() == true) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = uiState.publication!!.hashtags.joinToString(" ") { if (it.startsWith("#")) it else "#$it" },
+                                    style = Typography.bodyMedium,
+                                    color = ElectricBluePrimary,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     OutlinedButton(
                         onClick = { viewModel.copyCaption() },
-                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.height(44.dp),
+                        shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
                             contentColor = if (uiState.captionCopied) MintProgressLight else ElectricBluePrimary
-                        )
+                        ),
+                        border = BorderStroke(1.dp, if (uiState.captionCopied) MintProgressLight else ElectricBluePrimary)
                     ) {
-                        Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(if (uiState.captionCopied) "Caption Copied!" else "Copy Full Caption")
+                        Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(if (uiState.captionCopied) "Caption Copied to Clipboard" else "Copy Full Caption")
                     }
                 }
             }
@@ -200,10 +272,10 @@ fun AssistedPublishingScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Slate850),
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, Slate800)
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, BorderSubtle)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Text(
                         text = "2. Open Official Platform App",
                         style = Typography.titleMedium,
@@ -217,17 +289,18 @@ fun AssistedPublishingScreen(
                         color = Slate400
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Button(
                         onClick = { viewModel.launchPlatformApp() },
+                        modifier = Modifier.height(48.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Icon(Icons.Default.Launch, contentDescription = null, tint = Slate950)
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Icon(Icons.Default.Launch, contentDescription = null, tint = Slate950, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Open ${uiState.publication?.destination?.displayName ?: "Platform"}",
+                            text = "Launch ${uiState.publication?.destination?.displayName ?: "Platform"}",
                             color = Slate950,
                             fontWeight = FontWeight.Bold
                         )
@@ -250,38 +323,45 @@ fun AssistedPublishingScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Slate850),
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, Slate800)
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, BorderSubtle)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Text(
                         text = "3. Publication Verification Checklist",
                         style = Typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Slate100
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     uiState.checklistItems.forEach { item ->
-                        Row(
+                        Surface(
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (item.isChecked) Slate800.copy(alpha = 0.5f) else Slate800,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(vertical = 3.dp)
                         ) {
-                            Checkbox(
-                                checked = item.isChecked,
-                                onCheckedChange = { viewModel.toggleChecklistItem(item.id, it) },
-                                colors = CheckboxDefaults.colors(
-                                    checkedColor = MintProgress,
-                                    uncheckedColor = Slate700
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = item.isChecked,
+                                    onCheckedChange = { viewModel.toggleChecklistItem(item.id, it) },
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = MintProgress,
+                                        uncheckedColor = Slate600
+                                    )
                                 )
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = item.text,
-                                style = Typography.bodyMedium,
-                                color = if (item.isChecked) Slate400 else Slate100
-                            )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = item.text,
+                                    style = Typography.bodyMedium,
+                                    color = if (item.isChecked) Slate400 else Slate100,
+                                    textDecoration = if (item.isChecked) TextDecoration.LineThrough else TextDecoration.None
+                                )
+                            }
                         }
                     }
                 }
@@ -293,10 +373,10 @@ fun AssistedPublishingScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Slate850),
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, Slate800)
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, BorderDefault)
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Text(
                         text = "4. Final Step: Confirm Publication",
                         style = Typography.titleMedium,
@@ -309,26 +389,30 @@ fun AssistedPublishingScreen(
                         style = Typography.bodyMedium,
                         color = Slate400
                     )
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = { viewModel.openConfirmDialog() },
                         enabled = !uiState.isConfirmed,
                         colors = ButtonDefaults.buttonColors(containerColor = MintProgress),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        shape = RoundedCornerShape(14.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null, tint = Slate950)
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (uiState.isConfirmed) "Already Confirmed" else "Confirm Publication",
                             color = Slate950,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
                         )
                     }
                 }
             }
         }
 
-        item { Spacer(modifier = Modifier.height(30.dp)) }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 }
+

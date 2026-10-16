@@ -53,7 +53,7 @@ fun AnalyticsScreen(
     ) {
         // Analytics Header
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -64,9 +64,10 @@ fun AnalyticsScreen(
                         text = "GROWTH & PERFORMANCE",
                         style = Typography.labelSmall,
                         color = ElectricBluePrimary,
-                        letterSpacing = 1.2.sp,
+                        letterSpacing = 1.4.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "Analytics Hub",
                         style = Typography.headlineMedium,
@@ -78,10 +79,11 @@ fun AnalyticsScreen(
                 Button(
                     onClick = { showManualEntryDialog = true },
                     colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
-                    shape = RoundedCornerShape(10.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = Slate950)
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Default.Add, contentDescription = null, tint = Slate950, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text("Log Metrics", color = Slate950, fontWeight = FontWeight.Bold)
                 }
             }
@@ -104,6 +106,7 @@ fun AnalyticsScreen(
             ) {
                 PlatformMetricCard(
                     title = "YouTube",
+                    accentColor = YouTubeRed,
                     views = uiState.ytOverview?.totalViews ?: 0L,
                     median = uiState.ytOverview?.medianViews ?: 0L,
                     engagement = uiState.ytOverview?.averageEngagementRate ?: 0f,
@@ -111,6 +114,7 @@ fun AnalyticsScreen(
                 )
                 PlatformMetricCard(
                     title = "TikTok",
+                    accentColor = TikTokCyan,
                     views = uiState.tiktokOverview?.totalViews ?: 0L,
                     median = uiState.tiktokOverview?.medianViews ?: 0L,
                     engagement = uiState.tiktokOverview?.averageEngagementRate ?: 0f,
@@ -118,6 +122,7 @@ fun AnalyticsScreen(
                 )
                 PlatformMetricCard(
                     title = "Reels",
+                    accentColor = InstagramPurple,
                     views = uiState.igOverview?.totalViews ?: 0L,
                     median = uiState.igOverview?.medianViews ?: 0L,
                     engagement = uiState.igOverview?.averageEngagementRate ?: 0f,
@@ -139,11 +144,17 @@ fun AnalyticsScreen(
                     fontWeight = FontWeight.Bold,
                     color = Slate100
                 )
-                Text(
-                    text = "${uiState.recentSnapshots.size} Entries",
-                    style = Typography.labelSmall,
-                    color = Slate400
-                )
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Slate800
+                ) {
+                    Text(
+                        text = "${uiState.recentSnapshots.size} Entries",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                        style = Typography.labelSmall,
+                        color = Slate400
+                    )
+                }
             }
         }
 
@@ -152,91 +163,147 @@ fun AnalyticsScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Slate850),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, BorderSubtle)
                 ) {
                     Column(
-                        modifier = Modifier.padding(24.dp),
+                        modifier = Modifier.padding(28.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Slate800,
+                            modifier = Modifier.size(48.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.BarChart, contentDescription = null, tint = Slate500, modifier = Modifier.size(26.dp))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                         Text(
                             text = "No analytics snapshots recorded yet",
-                            style = Typography.bodyLarge,
-                            color = Slate400
+                            style = Typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Slate300
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = "Tap 'Log Metrics' above to enter 24h, 48h, or 7D metrics for your published videos.",
                             style = Typography.bodyMedium,
-                            color = Slate600
+                            color = Slate500
                         )
                     }
                 }
             }
         } else {
             items(uiState.recentSnapshots, key = { it.id }) { snapshot ->
+                val platformColor = when (snapshot.platform) {
+                    PlatformType.YOUTUBE_SHORTS, PlatformType.YOUTUBE_LONG -> YouTubeRed
+                    PlatformType.TIKTOK -> TikTokCyan
+                    PlatformType.INSTAGRAM_REELS -> InstagramPurple
+                }
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Slate850),
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(1.dp, Slate800)
+                    shape = RoundedCornerShape(16.dp),
+                    border = BorderStroke(1.dp, BorderSubtle)
                 ) {
-                    Column(modifier = Modifier.padding(14.dp)) {
+                    Column(modifier = Modifier.padding(16.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = snapshot.platform.displayName,
-                                style = Typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Slate100
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Surface(
+                                    shape = RoundedCornerShape(4.dp),
+                                    color = platformColor.copy(alpha = 0.15f)
+                                ) {
+                                    Text(
+                                        text = snapshot.platform.shortName,
+                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                        style = Typography.labelSmall,
+                                        fontSize = 10.sp,
+                                        color = platformColor,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = snapshot.platform.displayName,
+                                    style = Typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Slate100
+                                )
+                            }
                             Surface(
-                                shape = RoundedCornerShape(4.dp),
+                                shape = RoundedCornerShape(6.dp),
                                 color = Slate800
                             ) {
                                 Text(
                                     text = snapshot.measurementWindow,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                                     style = Typography.labelSmall,
-                                    color = ElectricBluePrimary
+                                    color = ElectricBluePrimary,
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Column {
-                                Text(text = "Views", style = Typography.labelSmall, color = Slate400)
-                                Text(
-                                    text = snapshot.views?.toString() ?: "N/A",
-                                    style = Typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Slate100
-                                )
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Slate800,
+                                modifier = Modifier.weight(1f).padding(end = 4.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text(text = "Views", style = Typography.labelSmall, color = Slate400)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = snapshot.views?.toString() ?: "N/A",
+                                        style = Typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Slate100
+                                    )
+                                }
                             }
-                            Column {
-                                Text(text = "Engagement", style = Typography.labelSmall, color = Slate400)
-                                Text(
-                                    text = snapshot.calculatedEngagementRate?.let { String.format("%.1f%%", it) } ?: "N/A",
-                                    style = Typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MintProgressLight
-                                )
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Slate800,
+                                modifier = Modifier.weight(1f).padding(horizontal = 2.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text(text = "Engagement", style = Typography.labelSmall, color = Slate400)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = snapshot.calculatedEngagementRate?.let { String.format("%.1f%%", it) } ?: "N/A",
+                                        style = Typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MintProgressLight
+                                    )
+                                }
                             }
-                            Column {
-                                Text(text = "Likes / Comm", style = Typography.labelSmall, color = Slate400)
-                                Text(
-                                    text = "${snapshot.likes ?: 0} / ${snapshot.comments ?: 0}",
-                                    style = Typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Slate100
-                                )
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = Slate800,
+                                modifier = Modifier.weight(1f).padding(start = 4.dp)
+                            ) {
+                                Column(modifier = Modifier.padding(10.dp)) {
+                                    Text(text = "Likes / Comm", style = Typography.labelSmall, color = Slate400)
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = "${snapshot.likes ?: 0} / ${snapshot.comments ?: 0}",
+                                        style = Typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Slate100
+                                    )
+                                }
                             }
                         }
                     }
@@ -244,13 +311,14 @@ fun AnalyticsScreen(
             }
         }
 
-        item { Spacer(modifier = Modifier.height(30.dp)) }
+        item { Spacer(modifier = Modifier.height(32.dp)) }
     }
 }
 
 @Composable
 fun PlatformMetricCard(
     title: String,
+    accentColor: Color,
     views: Long,
     median: Long,
     engagement: Float,
@@ -259,21 +327,55 @@ fun PlatformMetricCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Slate850),
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(1.dp, Slate800)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(1.dp, BorderSubtle)
     ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(text = title, style = Typography.labelSmall, color = ElectricBluePrimary, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "${views} views", style = Typography.bodyLarge, fontWeight = FontWeight.Bold, color = Slate100)
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(text = "Med: $median", style = Typography.labelSmall, color = Slate400)
+        Column(modifier = Modifier.padding(12.dp)) {
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = accentColor.copy(alpha = 0.15f)
+            ) {
+                Text(
+                    text = title,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    style = Typography.labelSmall,
+                    fontSize = 10.sp,
+                    color = accentColor,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "${String.format("%.1f", engagement)}% Eng",
-                style = Typography.labelSmall,
-                color = MintProgressLight,
-                fontWeight = FontWeight.SemiBold
+                text = "${views}",
+                style = Typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Slate100
             )
+            Text(
+                text = "total views",
+                style = Typography.labelSmall,
+                color = Slate500,
+                fontSize = 10.sp
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Med: $median",
+                    style = Typography.bodySmall,
+                    color = Slate400,
+                    fontSize = 11.sp
+                )
+                Text(
+                    text = "${String.format("%.1f", engagement)}%",
+                    style = Typography.labelSmall,
+                    color = MintProgressLight,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -303,10 +405,13 @@ fun ManualSnapshotEntryDialog(
                         FilterChip(
                             selected = selectedPlatform == p,
                             onClick = { selectedPlatform = p },
-                            label = { Text(p.shortName, fontSize = 11.sp) },
+                            label = { Text(p.shortName, fontSize = 11.sp, fontWeight = FontWeight.Bold) },
+                            shape = RoundedCornerShape(16.dp),
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = ElectricBluePrimary,
-                                selectedLabelColor = Slate950
+                                selectedLabelColor = Slate950,
+                                containerColor = Slate800,
+                                labelColor = Slate300
                             )
                         )
                     }
@@ -317,7 +422,13 @@ fun ManualSnapshotEntryDialog(
                     onValueChange = { viewsInput = it },
                     label = { Text("Views") },
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(10.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = ElectricBluePrimary,
+                        unfocusedBorderColor = BorderDefault,
+                        focusedTextColor = Slate100,
+                        unfocusedTextColor = Slate100
+                    )
                 )
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -326,14 +437,26 @@ fun ManualSnapshotEntryDialog(
                         onValueChange = { likesInput = it },
                         label = { Text("Likes") },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = ElectricBluePrimary,
+                            unfocusedBorderColor = BorderDefault,
+                            focusedTextColor = Slate100,
+                            unfocusedTextColor = Slate100
+                        )
                     )
                     OutlinedTextField(
                         value = commentsInput,
                         onValueChange = { commentsInput = it },
                         label = { Text("Comments") },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = ElectricBluePrimary,
+                            unfocusedBorderColor = BorderDefault,
+                            focusedTextColor = Slate100,
+                            unfocusedTextColor = Slate100
+                        )
                     )
                 }
 
@@ -343,14 +466,26 @@ fun ManualSnapshotEntryDialog(
                         onValueChange = { sharesInput = it },
                         label = { Text("Shares/Saves") },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = ElectricBluePrimary,
+                            unfocusedBorderColor = BorderDefault,
+                            focusedTextColor = Slate100,
+                            unfocusedTextColor = Slate100
+                        )
                     )
                     OutlinedTextField(
                         value = followersInput,
                         onValueChange = { followersInput = it },
                         label = { Text("Subs/Followers") },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = ElectricBluePrimary,
+                            unfocusedBorderColor = BorderDefault,
+                            focusedTextColor = Slate100,
+                            unfocusedTextColor = Slate100
+                        )
                     )
                 }
             }
@@ -372,7 +507,8 @@ fun ManualSnapshotEntryDialog(
                     )
                     onSave(snapshot)
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
+                shape = RoundedCornerShape(10.dp)
             ) {
                 Text("Save Snapshot", color = Slate950, fontWeight = FontWeight.Bold)
             }
@@ -382,6 +518,8 @@ fun ManualSnapshotEntryDialog(
                 Text("Cancel", color = Slate400)
             }
         },
-        containerColor = Slate900
+        containerColor = Slate900,
+        shape = RoundedCornerShape(20.dp)
     )
 }
+

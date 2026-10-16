@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.creatorgrowthos.data.local.entity.ContentPublicationEntity
 import com.example.creatorgrowthos.data.local.entity.ContentTaskEntity
+import com.example.creatorgrowthos.domain.model.PlatformType
 import com.example.creatorgrowthos.theme.*
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -42,7 +43,7 @@ fun CalendarScreen(
             .padding(horizontal = 16.dp)
     ) {
         // Calendar Navigation Header
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -53,82 +54,116 @@ fun CalendarScreen(
                     text = "SCHEDULE & PRODUCTION TIMELINE",
                     style = Typography.labelSmall,
                     color = ElectricBluePrimary,
-                    letterSpacing = 1.2.sp,
+                    letterSpacing = 1.4.sp,
                     fontWeight = FontWeight.Bold
                 )
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = uiState.selectedDateString.ifBlank { "Calendar" },
-                    style = Typography.titleLarge,
+                    style = Typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     color = Slate100
                 )
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                IconButton(onClick = { viewModel.previousDay() }) {
-                    Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Day", tint = Slate200)
-                }
-                IconButton(onClick = { viewModel.goToToday() }) {
-                    Icon(Icons.Default.Today, contentDescription = "Today", tint = ElectricBluePrimary)
-                }
-                IconButton(onClick = { viewModel.nextDay() }) {
-                    Icon(Icons.Default.ChevronRight, contentDescription = "Next Day", tint = Slate200)
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = Slate850,
+                border = BorderStroke(1.dp, BorderSubtle)
+            ) {
+                Row(
+                    modifier = Modifier.padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = { viewModel.previousDay() },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(Icons.Default.ChevronLeft, contentDescription = "Previous Day", tint = Slate300)
+                    }
+                    IconButton(
+                        onClick = { viewModel.goToToday() },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(Icons.Default.Today, contentDescription = "Today", tint = ElectricBluePrimary)
+                    }
+                    IconButton(
+                        onClick = { viewModel.nextDay() },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(Icons.Default.ChevronRight, contentDescription = "Next Day", tint = Slate300)
+                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             // Scheduled Publications Section
             if (uiState.publicationsForDay.isNotEmpty()) {
                 item {
                     Text(
                         text = "Scheduled Publications (${uiState.publicationsForDay.size})",
-                        style = Typography.labelLarge,
+                        style = Typography.titleMedium,
                         color = AmberWarningLight,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 items(uiState.publicationsForDay, key = { it.id }) { pub ->
+                    val platformColor = when (pub.destination) {
+                        PlatformType.YOUTUBE_SHORTS, PlatformType.YOUTUBE_LONG -> YouTubeRed
+                        PlatformType.TIKTOK -> TikTokCyan
+                        PlatformType.INSTAGRAM_REELS -> InstagramPurple
+                    }
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Slate850),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Slate700)
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, BorderSubtle)
                     ) {
                         Row(
                             modifier = Modifier.padding(14.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(10.dp)
-                                    .clip(CircleShape)
-                                    .background(AmberWarningLight)
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = platformColor.copy(alpha = 0.15f),
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(8.dp)
+                                            .clip(CircleShape)
+                                            .background(platformColor)
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = pub.platformSpecificTitle.ifBlank { "Post for ${pub.destination.displayName}" },
                                     style = Typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold,
+                                    fontWeight = FontWeight.Bold,
                                     color = Slate100
                                 )
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = "${pub.destination.displayName} • Due at ${formatTime(pub.plannedPublicationUtc)} • ${pub.publicationStatus.displayName}",
-                                    style = Typography.bodyMedium,
+                                    text = "${pub.destination.displayName} • Due ${formatTime(pub.plannedPublicationUtc)} • ${pub.publicationStatus.displayName}",
+                                    style = Typography.bodySmall,
                                     color = Slate400
                                 )
                             }
                             Button(
                                 onClick = { onNavigateToPublish(pub.id) },
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary)
+                                shape = RoundedCornerShape(10.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = AmberWarningLight)
                             ) {
                                 Text("Publish", color = Slate950, style = Typography.labelSmall, fontWeight = FontWeight.Bold)
                             }
@@ -141,7 +176,7 @@ fun CalendarScreen(
             item {
                 Text(
                     text = "Production Sessions (${uiState.tasksForDay.size})",
-                    style = Typography.labelLarge,
+                    style = Typography.titleMedium,
                     color = ElectricBluePrimary,
                     fontWeight = FontWeight.Bold
                 )
@@ -152,16 +187,24 @@ fun CalendarScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Slate850),
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, BorderSubtle)
                     ) {
                         Column(
                             modifier = Modifier.padding(24.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "No tasks scheduled for this day",
-                                style = Typography.bodyLarge,
-                                color = Slate400
+                                text = "No production sessions scheduled for this day",
+                                style = Typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Slate300
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "Sessions automatically populate from active pipeline workflow items.",
+                                style = Typography.bodySmall,
+                                color = Slate500
                             )
                         }
                     }
@@ -171,8 +214,8 @@ fun CalendarScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Slate850),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Slate800)
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(1.dp, BorderSubtle)
                     ) {
                         Row(
                             modifier = Modifier.padding(14.dp),
@@ -186,15 +229,34 @@ fun CalendarScreen(
                             )
                             Spacer(modifier = Modifier.width(12.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = task.title,
-                                    style = Typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Slate100
-                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = task.title,
+                                        style = Typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = Slate100
+                                    )
+                                    if (task.isCritical) {
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = CrimsonCritical.copy(alpha = 0.2f)
+                                        ) {
+                                            Text(
+                                                text = "CRITICAL",
+                                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                                style = Typography.labelSmall,
+                                                fontSize = 9.sp,
+                                                color = CrimsonCriticalLight,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = "${formatTime(task.scheduledStartTimeUtc)} - ${formatTime(task.scheduledEndTimeUtc)} (${task.estimatedDurationMinutes}m) • ${task.status.displayName}",
-                                    style = Typography.bodyMedium,
+                                    style = Typography.bodySmall,
                                     color = Slate400
                                 )
                             }
@@ -203,7 +265,7 @@ fun CalendarScreen(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(30.dp)) }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }
@@ -213,3 +275,4 @@ private fun formatTime(utc: Long): String {
     cal.timeInMillis = utc
     return String.format("%02d:%02d", cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
 }
+

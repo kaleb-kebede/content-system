@@ -75,7 +75,7 @@ fun TodayScreen(
     ) {
         // 1. Date Header & Daily Focus
         item {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -86,9 +86,10 @@ fun TodayScreen(
                         text = "DAILY COMMAND CENTER",
                         style = Typography.labelSmall,
                         color = ElectricBluePrimary,
-                        letterSpacing = 1.5.sp,
+                        letterSpacing = 1.6.sp,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = uiState.currentDateFormatted.ifBlank { "Today's Agenda" },
                         style = Typography.headlineMedium,
@@ -100,23 +101,31 @@ fun TodayScreen(
                 // Completion Progress Ring / Pill
                 Surface(
                     shape = RoundedCornerShape(20.dp),
-                    color = Slate800,
-                    border = BorderStroke(1.dp, Slate700)
+                    color = Slate850,
+                    border = BorderStroke(1.dp, BorderDefault)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        CircularProgressIndicator(
+                            progress = { uiState.completionPercentage / 100f },
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.5.dp,
+                            color = if (uiState.completionPercentage >= 80f) MintProgressLight else ElectricBluePrimary,
+                            trackColor = Slate750
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "${uiState.completionPercentage.toInt()}%",
-                            style = Typography.titleMedium,
+                            style = Typography.labelLarge,
                             fontWeight = FontWeight.Bold,
                             color = if (uiState.completionPercentage >= 80f) MintProgressLight else ElectricBluePrimary
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Done",
-                            style = Typography.bodyMedium,
+                            style = Typography.bodySmall,
                             color = Slate400
                         )
                     }
@@ -129,55 +138,83 @@ fun TodayScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = CrimsonCriticalLight.copy(alpha = 0.15f)),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, CrimsonCriticalLight)
+                    colors = CardDefaults.cardColors(containerColor = CrimsonCritical.copy(alpha = 0.12f)),
+                    shape = RoundedCornerShape(18.dp),
+                    border = BorderStroke(1.dp, CrimsonCriticalLight.copy(alpha = 0.8f))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Warning,
-                                contentDescription = "Critical Warning",
-                                tint = CrimsonCriticalLight,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "${uiState.criticalMissedTasks.size} Critical Missed Task(s)",
-                                style = Typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = CrimsonCriticalLight
-                            )
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = CrimsonCritical.copy(alpha = 0.25f),
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = "Critical Warning",
+                                        tint = CrimsonCriticalLight,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "${uiState.criticalMissedTasks.size} Critical Task(s) Overdue",
+                                    style = Typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = CrimsonCriticalLight
+                                )
+                                Text(
+                                    text = "Strict routine protocol active",
+                                    style = Typography.labelSmall,
+                                    color = CrimsonCriticalLight.copy(alpha = 0.8f)
+                                )
+                            }
                         }
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "Strict enforcement is active. You must decide whether to reschedule, split, or justify skipping before next sessions.",
+                            text = "A scheduled critical block was missed. You must reschedule, split, or record a reason before proceeding.",
                             style = Typography.bodyMedium,
                             color = Slate200
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         uiState.criticalMissedTasks.forEach { task ->
-                            Row(
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Slate900.copy(alpha = 0.6f),
+                                border = BorderStroke(1.dp, CrimsonCritical.copy(alpha = 0.4f)),
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                    .padding(vertical = 4.dp)
                             ) {
-                                Text(
-                                    text = "• ${task.title}",
-                                    style = Typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Slate100,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                Button(
-                                    onClick = { viewModel.openRecoveryDialog(task) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = CrimsonCritical),
-                                    shape = RoundedCornerShape(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Resolve", style = Typography.labelLarge)
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = task.title,
+                                            style = Typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Slate100
+                                        )
+                                        Text(
+                                            text = "${task.estimatedDurationMinutes}m • ${task.priority.label}",
+                                            style = Typography.bodySmall,
+                                            color = Slate400
+                                        )
+                                    }
+                                    Button(
+                                        onClick = { viewModel.openRecoveryDialog(task) },
+                                        colors = ButtonDefaults.buttonColors(containerColor = CrimsonCritical),
+                                        shape = RoundedCornerShape(10.dp),
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                                    ) {
+                                        Text("Resolve", style = Typography.labelLarge, color = Slate100, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
@@ -188,58 +225,104 @@ fun TodayScreen(
 
         // 3. Current Scheduled Task & Primary Action (Start / Resume / Complete)
         item {
+            val isActive = uiState.activeTask != null
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Slate850),
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, if (uiState.activeTask != null) ElectricBluePrimary else Slate700)
+                shape = RoundedCornerShape(22.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (isActive) ElectricBluePrimary else BorderDefault
+                )
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(if (isActive) ActiveSessionGradient else HeroCardGradient)
+                        .padding(20.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = if (uiState.activeTask != null) MintProgressLight.copy(alpha = 0.2f) else Slate800
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (isActive) MintProgress.copy(alpha = 0.2f) else Slate800,
+                            border = BorderStroke(1.dp, if (isActive) MintProgressLight.copy(alpha = 0.4f) else BorderSubtle)
                         ) {
-                            Text(
-                                text = if (uiState.activeTask != null) "CURRENT ACTIVE SESSION" else "UP NEXT",
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                style = Typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (uiState.activeTask != null) MintProgressLight else Slate400
-                            )
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (isActive) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(7.dp)
+                                            .clip(CircleShape)
+                                            .background(MintProgressLight)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                }
+                                Text(
+                                    text = if (isActive) "ACTIVE SESSION" else "UP NEXT",
+                                    style = Typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isActive) MintProgressLight else Slate400
+                                )
+                            }
                         }
 
-                        if (uiState.activeTask != null) {
-                            Text(
-                                text = "In Progress",
-                                style = Typography.labelLarge,
-                                color = MintProgressLight
-                            )
+                        if (isActive) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MintProgress.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "In Progress",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    style = Typography.labelSmall,
+                                    color = MintProgressLight,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     val displayTask = uiState.activeTask ?: uiState.nextTask
                     if (displayTask != null) {
                         Text(
                             text = displayTask.title,
-                            style = Typography.titleLarge,
+                            style = Typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = Slate100
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Scheduled: ${formatTime(displayTask.scheduledStartTimeUtc)} - ${formatTime(displayTask.scheduledEndTimeUtc)} (${displayTask.estimatedDurationMinutes}m)",
-                            style = Typography.bodyMedium,
-                            color = Slate400
-                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Slate800
+                            ) {
+                                Text(
+                                    text = "${formatTime(displayTask.scheduledStartTimeUtc)} - ${formatTime(displayTask.scheduledEndTimeUtc)}",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                    style = Typography.labelSmall,
+                                    color = Slate300
+                                )
+                            }
+                            Text(
+                                text = "• ${displayTask.estimatedDurationMinutes} min session",
+                                style = Typography.bodyMedium,
+                                color = Slate400
+                            )
+                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -248,34 +331,36 @@ fun TodayScreen(
                             if (displayTask.status == TaskStatus.ACTIVE) {
                                 Button(
                                     onClick = { viewModel.completeTask(displayTask.id, displayTask.estimatedDurationMinutes) },
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f).height(48.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = MintProgress),
-                                    shape = RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(14.dp)
                                 ) {
-                                    Icon(imageVector = Icons.Default.Check, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(6.dp))
-                                    Text("Complete")
+                                    Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = Slate950)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Complete Session", color = Slate950, fontWeight = FontWeight.Bold)
                                 }
                                 OutlinedButton(
                                     onClick = { viewModel.pauseTask(displayTask.id) },
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Slate200)
+                                    modifier = Modifier.height(48.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Slate200),
+                                    border = BorderStroke(1.dp, Slate700)
                                 ) {
                                     Icon(imageVector = Icons.Default.Pause, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text("Pause")
                                 }
                             } else {
                                 Button(
                                     onClick = { viewModel.startTask(displayTask.id) },
-                                    modifier = Modifier.weight(1f),
+                                    modifier = Modifier.weight(1f).height(48.dp),
                                     colors = ButtonDefaults.buttonColors(containerColor = ElectricBluePrimary),
-                                    shape = RoundedCornerShape(12.dp)
+                                    shape = RoundedCornerShape(14.dp)
                                 ) {
                                     Icon(imageVector = Icons.Default.PlayArrow, contentDescription = null, tint = Slate950)
-                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = if (displayTask.status == TaskStatus.PAUSED) "Resume" else "Start Session",
+                                        text = if (displayTask.status == TaskStatus.PAUSED) "Resume Session" else "Start Session",
                                         color = Slate950,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -283,8 +368,10 @@ fun TodayScreen(
 
                                 OutlinedButton(
                                     onClick = { viewModel.openRecoveryDialog(displayTask) },
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Slate400)
+                                    modifier = Modifier.height(48.dp),
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Slate300),
+                                    border = BorderStroke(1.dp, BorderDefault)
                                 ) {
                                     Text("Adjust")
                                 }
@@ -292,15 +379,16 @@ fun TodayScreen(
                         }
                     } else {
                         Text(
-                            text = "No active or upcoming sessions right now",
-                            style = Typography.bodyLarge,
-                            color = Slate400
+                            text = "All scheduled sessions for today completed",
+                            style = Typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MintProgressLight
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "All scheduled items for today have been completed or addressed.",
+                            text = "Great job! You've stayed on routine. Review content or capture fresh ideas below.",
                             style = Typography.bodyMedium,
-                            color = Slate600
+                            color = Slate400
                         )
                     }
                 }
@@ -312,55 +400,84 @@ fun TodayScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Slate850),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, AmberWarningLight)
+                    colors = CardDefaults.cardColors(containerColor = AmberWarning.copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(18.dp),
+                    border = BorderStroke(1.dp, AmberWarningLight.copy(alpha = 0.7f))
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Send, contentDescription = null, tint = AmberWarningLight)
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Awaiting Publication Confirmation",
-                                style = Typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Slate100
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "Did you complete publishing on the platform? Confirm and save URL:",
-                            style = Typography.bodyMedium,
-                            color = Slate400
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        uiState.postsAwaitingConfirmation.forEach { pub ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 4.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                shape = RoundedCornerShape(10.dp),
+                                color = AmberWarning.copy(alpha = 0.25f),
+                                modifier = Modifier.size(36.dp)
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = pub.platformSpecificTitle.ifBlank { "Post for ${pub.destination.displayName}" },
-                                        style = Typography.bodyLarge,
-                                        fontWeight = FontWeight.SemiBold,
-                                        color = Slate100
-                                    )
-                                    Text(
-                                        text = pub.destination.displayName,
-                                        style = Typography.labelSmall,
-                                        color = ElectricBluePrimary
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Default.Send,
+                                        contentDescription = null,
+                                        tint = AmberWarningLight,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
-                                Button(
-                                    onClick = { onNavigateToPublish(pub.id) },
-                                    colors = ButtonDefaults.buttonColors(containerColor = AmberWarningLight),
-                                    shape = RoundedCornerShape(8.dp)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Awaiting Publication Confirmation",
+                                    style = Typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Slate100
+                                )
+                                Text(
+                                    text = "Confirm platform publication to start 48h analytics window",
+                                    style = Typography.bodySmall,
+                                    color = Slate400
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(14.dp))
+                        uiState.postsAwaitingConfirmation.forEach { pub ->
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = Slate850,
+                                border = BorderStroke(1.dp, BorderSubtle),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(14.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text("Confirm", color = Slate950, fontWeight = FontWeight.Bold)
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = pub.platformSpecificTitle.ifBlank { "Post for ${pub.destination.displayName}" },
+                                            style = Typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Slate100
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Surface(
+                                            shape = RoundedCornerShape(4.dp),
+                                            color = Slate800
+                                        ) {
+                                            Text(
+                                                text = pub.destination.displayName,
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                style = Typography.labelSmall,
+                                                color = ElectricBluePrimary
+                                            )
+                                        }
+                                    }
+                                    Button(
+                                        onClick = { onNavigateToPublish(pub.id) },
+                                        colors = ButtonDefaults.buttonColors(containerColor = AmberWarningLight),
+                                        shape = RoundedCornerShape(10.dp),
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp)
+                                    ) {
+                                        Text("Confirm", color = Slate950, fontWeight = FontWeight.Bold)
+                                    }
                                 }
                             }
                         }
@@ -369,35 +486,52 @@ fun TodayScreen(
             }
         }
 
-        // 5. Weekly Target Progress Card (Section 9)
+        // 5. Weekly Target Progress Card
         uiState.weeklyProgress?.let { summary ->
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = Slate850),
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, Slate700)
+                    shape = RoundedCornerShape(18.dp),
+                    border = BorderStroke(1.dp, BorderDefault)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                    Column(modifier = Modifier.padding(18.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(
-                                text = "Weekly Publishing Progress",
-                                style = Typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = Slate100
-                            )
-                            Text(
-                                text = "${summary.totalConfirmed}/${summary.totalTarget} Published",
-                                style = Typography.labelLarge,
-                                color = MintProgressLight
-                            )
+                            Column {
+                                Text(
+                                    text = "WEEKLY PUBLISHING DISCIPLINE",
+                                    style = Typography.labelSmall,
+                                    color = ElectricBluePrimary,
+                                    letterSpacing = 1.2.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Target Progress",
+                                    style = Typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Slate100
+                                )
+                            }
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MintProgress.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "${summary.totalConfirmed}/${summary.totalTarget} Published",
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                    style = Typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MintProgressLight
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         LinearProgressIndicator(
                             progress = { summary.overallPercentage / 100f },
                             modifier = Modifier
@@ -408,20 +542,31 @@ fun TodayScreen(
                             trackColor = Slate800,
                         )
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             summary.platformBreakdown.forEach { p ->
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Text(text = p.platform.shortName, style = Typography.labelSmall, color = Slate400)
-                                    Text(
-                                        text = "${p.confirmedPublished}/${p.weeklyTarget}",
-                                        style = Typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = if (p.confirmedPublished >= p.weeklyTarget) MintProgressLight else Slate100
-                                    )
+                                Surface(
+                                    shape = RoundedCornerShape(10.dp),
+                                    color = Slate800,
+                                    border = BorderStroke(1.dp, BorderSubtle),
+                                    modifier = Modifier.weight(1f).padding(horizontal = 3.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Text(text = p.platform.shortName, style = Typography.labelSmall, color = Slate400)
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "${p.confirmedPublished}/${p.weeklyTarget}",
+                                            style = Typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = if (p.confirmedPublished >= p.weeklyTarget) MintProgressLight else Slate100
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -445,11 +590,17 @@ fun TodayScreen(
                     fontWeight = FontWeight.Bold,
                     color = Slate100
                 )
-                Text(
-                    text = "${uiState.todayTasks.size} Tasks",
-                    style = Typography.labelSmall,
-                    color = Slate400
-                )
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = Slate800
+                ) {
+                    Text(
+                        text = "${uiState.todayTasks.size} Sessions",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = Typography.labelSmall,
+                        color = Slate400
+                    )
+                }
             }
         }
 
@@ -464,7 +615,7 @@ fun TodayScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -490,22 +641,30 @@ fun TaskTimelineItem(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Slate850),
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, if (task.status == TaskStatus.ACTIVE) ElectricBluePrimary else Slate800)
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(
+            1.dp,
+            if (task.status == TaskStatus.ACTIVE) ElectricBluePrimary else BorderSubtle
+        )
     ) {
         Row(
             modifier = Modifier.padding(14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Timeline Status Indicator
+            // Connected Timeline Status Node
             Box(
                 modifier = Modifier
-                    .size(10.dp)
+                    .size(12.dp)
                     .clip(CircleShape)
                     .background(statusColor)
+                    .border(
+                        2.dp,
+                        if (task.status == TaskStatus.ACTIVE) ElectricBluePrimary.copy(alpha = 0.5f) else Color.Transparent,
+                        CircleShape
+                    )
             )
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(14.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -523,7 +682,7 @@ fun TaskTimelineItem(
                         ) {
                             Text(
                                 text = "CRITICAL",
-                                modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
                                 style = Typography.labelSmall,
                                 fontSize = 9.sp,
                                 color = CrimsonCriticalLight,
@@ -533,23 +692,42 @@ fun TaskTimelineItem(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "${formatTime(task.scheduledStartTimeUtc)} - ${formatTime(task.scheduledEndTimeUtc)} • ${task.status.displayName}",
-                    style = Typography.bodyMedium,
-                    color = statusColor
-                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "${formatTime(task.scheduledStartTimeUtc)} - ${formatTime(task.scheduledEndTimeUtc)}",
+                        style = Typography.bodySmall,
+                        color = Slate400
+                    )
+                    Text(
+                        text = " • ",
+                        style = Typography.bodySmall,
+                        color = Slate600
+                    )
+                    Text(
+                        text = task.status.displayName,
+                        style = Typography.bodySmall,
+                        color = statusColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
 
             // Context Actions based on status
             when (task.status) {
                 TaskStatus.UPCOMING -> {
-                    IconButton(onClick = onStart) {
+                    IconButton(
+                        onClick = onStart,
+                        modifier = Modifier.size(44.dp)
+                    ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = "Start", tint = ElectricBluePrimary)
                     }
                 }
                 TaskStatus.ACTIVE -> {
-                    IconButton(onClick = onComplete) {
+                    IconButton(
+                        onClick = onComplete,
+                        modifier = Modifier.size(44.dp)
+                    ) {
                         Icon(Icons.Default.CheckCircle, contentDescription = "Complete", tint = MintProgressLight)
                     }
                 }
@@ -558,16 +736,24 @@ fun TaskTimelineItem(
                         onClick = onRecovery,
                         colors = ButtonDefaults.buttonColors(containerColor = CrimsonCritical),
                         shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text("Decision", style = Typography.labelSmall)
+                        Text("Decision", style = Typography.labelSmall, fontWeight = FontWeight.Bold)
                     }
                 }
                 TaskStatus.COMPLETED -> {
-                    Icon(Icons.Default.Check, contentDescription = "Done", tint = MintProgress)
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Completed",
+                        tint = MintProgress,
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
                 else -> {
-                    IconButton(onClick = onRecovery) {
+                    IconButton(
+                        onClick = onRecovery,
+                        modifier = Modifier.size(44.dp)
+                    ) {
                         Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = Slate400)
                     }
                 }
@@ -581,3 +767,4 @@ private fun formatTime(utc: Long): String {
     cal.timeInMillis = utc
     return String.format("%02d:%02d", cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE))
 }
+
